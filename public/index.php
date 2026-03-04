@@ -29,6 +29,16 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
  * and fires up an environment-specific bootstrapping.
  */
 
+/*
+ * If putenv() is disabled (e.g. on Cloudways), load environment
+ * variables from server-env.php instead of .env
+ * This file is NOT in git — it's created manually on the server.
+ */
+$serverEnvFile = FCPATH . '../server-env.php';
+if (file_exists($serverEnvFile)) {
+    require_once $serverEnvFile;
+}
+
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require_once FCPATH . '../vendor/codeigniter4/framework/system/Boot.php';
 
