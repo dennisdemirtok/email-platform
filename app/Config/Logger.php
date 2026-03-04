@@ -118,10 +118,7 @@ class Logger extends BaseConfig
             'path' => '',
         ],
 
-        \App\ThirdParty\LoggerHandlers\StdoutHandler::class => [
-            'handles' => ['critical', 'alert', 'emergency', 'error', 'warning', 'notice', 'info', 'debug'],
-            // Configurez d'autres options ici si nécessaire
-        ],
+        // StdoutHandler removed - not needed in production
 
         /*
          * The ChromeLoggerHandler requires the use of the Chrome web browser
