@@ -50,7 +50,7 @@ class Paths
      * for maximum security, keeping it out of the app and/or
      * system directories.
      */
-    public string $writableDirectory = '/tmp/';
+    public string $writableDirectory = __DIR__ . '/../../writable';
 
     /**
      * ---------------------------------------------------------------
