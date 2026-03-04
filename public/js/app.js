@@ -1,5 +1,5 @@
 /* ============================================
-   Flattered Email Platform - Main JavaScript
+   Email Platform - Main JavaScript
    ============================================ */
 
 // ---- CSRF Token Helper ----

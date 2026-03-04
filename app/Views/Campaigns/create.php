@@ -121,7 +121,7 @@
                     <div class="row">
                         <div class="col-md-8 mb-2">
                             <textarea id="aiPrompt" class="form-control" rows="3"
-                                placeholder="T.ex: Skapa ett välkomstmail för nya kunder hos Flattered. Inkludera en hero-bild, en varm hälsning, och en rabattkod på 15%."></textarea>
+                                placeholder="T.ex: Skapa ett välkomstmail för nya kunder. Inkludera en hero-bild, en varm hälsning, och en rabattkod på 15%."></textarea>
                         </div>
                         <div class="col-md-4 mb-2">
                             <label class="form-label" style="font-size: 0.85rem;">Visuell inspiration (valfritt)</label>

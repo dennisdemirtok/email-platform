@@ -19,7 +19,7 @@ if (!function_exists('anthropic_generate_email')) {
         }
 
         $systemPrompt = <<<'SYSPROMPT'
-You are an expert email designer for "Flattered", a premium fashion brand. Generate responsive, email-client-compatible HTML for the email described below.
+You are an expert email designer. Generate responsive, email-client-compatible HTML for the email described below.
 
 Rules:
 - Use HTML tables for layout (not divs with CSS grid/flexbox) for maximum email client compatibility
@@ -28,13 +28,13 @@ Rules:
 - Maximum width: 600px, centered with a wrapper table
 - Include a hidden preheader text span at the very top for inbox preview
 - Make the design responsive using percentage widths where possible
-- Use the Flattered brand color palette:
+- Use a clean, modern color palette:
   - Primary: #e94560 (buttons, accents)
   - Dark: #1a1a2e (headers, footer background)
   - Accent: #0f3460 (secondary elements)
   - Light background: #f8f9fc
   - Text: #333333
-- Use https://placehold.co/ for placeholder images (e.g. https://placehold.co/600x300/e94560/ffffff?text=Flattered)
+- Use https://placehold.co/ for placeholder images (e.g. https://placehold.co/600x300/e94560/ffffff?text=Email)
 - Include an unsubscribe link at the bottom with href="{UNSUBSCRIBE_LINK}"
 - Do NOT include <html>, <head>, or <body> tags - just the email body content starting from the outermost <table>
 - Make the design professional, modern, and visually appealing
