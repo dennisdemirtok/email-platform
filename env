@@ -1,0 +1,48 @@
+#--------------------------------------------------------------------
+# Example Environment Configuration file
+#
+# This file can be used as a starting point for your own
+# custom .env files, and contains most of the possible settings
+# available in a default install.
+#
+# By default, all of the settings are commented out. If you want
+# to override the setting, you must un-comment it by removing the '#'
+# at the beginning of the line.
+#--------------------------------------------------------------------
+
+#--------------------------------------------------------------------
+# ENVIRONMENT
+#--------------------------------------------------------------------
+
+CI_ENVIRONMENT = development
+
+#--------------------------------------------------------------------
+# APP
+#--------------------------------------------------------------------
+
+# app.baseURL = ''
+# app.forceGlobalSecureRequests = false
+# app.CSPEnabled = false
+
+#--------------------------------------------------------------------
+# MONGODB
+#--------------------------------------------------------------------
+
+MONGODB_URI = mongodb+srv://YOUR_USER:YOUR_PASSWORD@your-cluster.mongodb.net/?retryWrites=true&w=majority
+DATABASE = EmailTrackerDB
+
+#--------------------------------------------------------------------
+# AUTHENTICATION
+#--------------------------------------------------------------------
+
+USER_APP = your_username
+PASSWORD_APP = your_password
+
+#--------------------------------------------------------------------
+# RESEND API & CLOUD FUNCTIONS
+#--------------------------------------------------------------------
+
+CLOUD_FUNCTION_RESEND_QUEUE = https://your-region-your-project.cloudfunctions.net/resend-queue
+CLOUD_FUNCTION_TOKEN = your_cloud_function_bearer_token
+FROM_DOMAIN = yourdomain.com
+RESEND_API_KEY = re_your_resend_api_key

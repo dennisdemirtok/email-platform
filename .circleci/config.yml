@@ -1,0 +1,34 @@
+version: 2.1
+orbs:
+  gcp-cli: circleci/gcp-cli@3.1.1
+jobs:
+  deploy:
+    executor: gcp-cli/default
+    resource_class: small
+    steps:
+      - checkout
+      - run:
+          command: |
+            echo ${GCLOUD_SERVICE_KEY} | base64 --decode --ignore-garbage > $HOME/gcloud-service-key.json
+            echo 'export GOOGLE_CLOUD_KEY=$(cat $HOME/gcloud-service-key.json)' >> $BASH_ENV
+      - gcp-cli/setup:
+          version: 466.0.0
+          gcloud_service_key: GOOGLE_CLOUD_KEY
+          google_project_id: GOOGLE_PROJECT_ID
+          google_compute_region: REGION
+      - run:
+          name: Deploy to Google App Engine
+          command: |
+            gcloud app \
+              --quiet deploy 'app.yaml' \
+              --version=$CIRCLE_BUILD_NUM \
+              --promote \
+              --stop-previous-version \
+              --verbosity=warning
+workflows:
+  deploy_to_production:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only: main

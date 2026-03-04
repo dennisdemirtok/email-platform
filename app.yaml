@@ -1,0 +1,23 @@
+runtime: php82
+
+env_variables:
+  app_baseURL: 'https://your-app-url.example.com/'
+  CI_ENVIRONMENT: 'production'
+  MONGODB_URI: 'mongodb+srv://YOUR_USER:YOUR_PASSWORD@your-cluster.mongodb.net/?retryWrites=true&w=majority'
+  DATABASE: 'EmailTrackerDB'
+  USER_APP: 'your_username'
+  PASSWORD_APP: 'your_password'
+  CLOUD_FUNCTION_RESEND_QUEUE: 'https://your-region-your-project.cloudfunctions.net/resend-queue'
+  CLOUD_FUNCTION_TOKEN: 'your_cloud_function_bearer_token'
+  FROM_DOMAIN: 'yourdomain.com'
+  RESEND_API_KEY: 're_your_resend_api_key'
+
+handlers:
+- url: /.*
+  script: auto
+  secure: always
+  redirect_http_response_code: 301
+
+vpc_access_connector:
+  name: projects/your-project/locations/your-region/connectors/your-connector
+  egress_setting: all-traffic
