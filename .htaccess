@@ -1,6 +1,11 @@
+# Disable directory browsing
+Options -Indexes
+
 <IfModule mod_rewrite.c>
+    Options +FollowSymlinks
     RewriteEngine On
 
-    # Redirect everything to the public/ folder
+    # If the request is for a real file or directory in public/, serve it
+    RewriteCond %{REQUEST_URI} !^/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
