@@ -2,7 +2,7 @@
 
 if (!function_exists('resend_api_request')) {
     function resend_api_request($endpoint, $method = 'GET', $data = null) {
-        $api_key = getenv('RESEND_API_KEY');
+        $api_key = env('RESEND_API_KEY') ?: ($_SERVER['RESEND_API_KEY'] ?? '');
 
         $ch = curl_init();
 

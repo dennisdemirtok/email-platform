@@ -9,8 +9,8 @@ class SupabaseClient
 
     public function __construct()
     {
-        $url = getenv('SUPABASE_URL');
-        $key = getenv('SUPABASE_KEY');
+        $url = env('SUPABASE_URL') ?: ($_SERVER['SUPABASE_URL'] ?? '');
+        $key = env('SUPABASE_KEY') ?: ($_SERVER['SUPABASE_KEY'] ?? '');
 
         if (empty($url) || empty($key)) {
             log_message('error', 'SUPABASE_URL or SUPABASE_KEY environment variable not set');

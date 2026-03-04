@@ -12,7 +12,7 @@ if (!function_exists('anthropic_generate_email')) {
     function anthropic_generate_email(string $prompt, ?string $base64Image = null, ?string $mimeType = null)
     {
         // Try multiple ways to get the API key (CI4 env() handles DotEnv correctly)
-        $apiKey = env('ANTHROPIC_API_KEY') ?: getenv('ANTHROPIC_API_KEY') ?: $_ENV['ANTHROPIC_API_KEY'] ?? '';
+        $apiKey = env('ANTHROPIC_API_KEY') ?: ($_SERVER['ANTHROPIC_API_KEY'] ?? '');
         if (empty($apiKey)) {
             log_message('error', 'ANTHROPIC_API_KEY not set. env()=' . var_export(env('ANTHROPIC_API_KEY'), true));
             return false;
