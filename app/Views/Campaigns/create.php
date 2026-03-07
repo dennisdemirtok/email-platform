@@ -81,8 +81,8 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Campaign Name</label>
-                    <input class="form-control" type="text" name="campaign_name" id="campaign_name" required pattern="^[a-zA-Z0-9_-]+$">
-                    <div class="form-text">No spaces or special characters</div>
+                    <input class="form-control" type="text" name="campaign_name" id="campaign_name" required>
+                    <div class="form-text">Ge kampanjen ett namn</div>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Subject Line</label>
