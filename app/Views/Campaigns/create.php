@@ -165,10 +165,7 @@
                                 <div class="template-name d-flex justify-content-between align-items-center">
                                     <span class="text-truncate"><?= esc($template['title'] ?? 'Untitled') ?></span>
                                     <?php if (!empty($template['id'])): ?>
-                                    <form action="<?= base_url('campaigns/delete-template/' . $template['id']) ?>" method="POST" class="d-inline ms-1" onsubmit="return confirm('Ta bort denna mall?')">
-                                        <?= csrf_field() ?>
-                                        <button type="submit" class="btn btn-link btn-sm text-danger p-0" title="Ta bort"><i class="fas fa-trash-alt" style="font-size: 0.7rem;"></i></button>
-                                    </form>
+                                    <button type="button" class="btn btn-link btn-sm text-danger p-0 delete-template-btn" data-template-id="<?= esc($template['id']) ?>" title="Ta bort"><i class="fas fa-trash-alt" style="font-size: 0.7rem;"></i></button>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -533,6 +530,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.body.appendChild(form);
         form.submit();
+    });
+
+    // --- Delete template (via JS to avoid nested forms) ---
+    document.querySelectorAll('.delete-template-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!confirm('Ta bort denna mall?')) return;
+            var id = this.dataset.templateId;
+            var form = document.createElement('form');
+            form.method = 'POST';
+            form.action = BASE_URL + 'campaigns/delete-template/' + id;
+            var csrfInput = document.querySelector('input[name="csrf_test_name"]');
+            if (csrfInput) {
+                var csrf = document.createElement('input');
+                csrf.type = 'hidden';
+                csrf.name = 'csrf_test_name';
+                csrf.value = csrfInput.value;
+                form.appendChild(csrf);
+            }
+            document.body.appendChild(form);
+            form.submit();
+        });
     });
 
     // --- Form submit ---
