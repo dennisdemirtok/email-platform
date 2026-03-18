@@ -96,7 +96,7 @@
                     <?php endforeach; ?>
                 </select>
             <?php elseif (!empty($allDomains)): ?>
-                <div class="domain-selector mb-2" style="text-align:center; opacity:0.7; font-size:0.85rem;">
+                <div class="domain-selector mb-2" style="text-align:center; opacity:0.7; font-size:0.75rem;">
                     <i class="fas fa-globe me-1"></i> <?= esc($allDomains[0]['name'] ?? $allDomains[0]['domain_name'] ?? 'Unknown') ?>
                 </div>
             <?php endif; ?>

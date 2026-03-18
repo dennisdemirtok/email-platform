@@ -24,7 +24,7 @@
     .template-preview {
         height: 120px;
         overflow: hidden;
-        background: #f8f9fc;
+        background: var(--body-bg);
         position: relative;
     }
     .template-preview iframe {

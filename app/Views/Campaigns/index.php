@@ -254,13 +254,13 @@
                 </ul>
                 <div class="tab-content mt-3">
                     <div class="tab-pane fade show active" id="preview" role="tabpanel" aria-labelledby="preview-tab">
-                        <iframe id="templatePreview" style="border: 1px solid var(--card-border); border-radius: var(--border-radius); height: 500px; width: 100%;"></iframe>
+                        <iframe id="templatePreview" style="border: 1px solid var(--card-border); border-radius: var(--radius); height: 500px; width: 100%;"></iframe>
                     </div>
                     <div class="tab-pane fade" id="plaintext" role="tabpanel" aria-labelledby="plaintext-tab">
-                        <pre id="templatePlainText" style="height: 500px; width: 100%; overflow: auto; padding: 1rem; background: #f8f9fc; border-radius: var(--border-radius);"></pre>
+                        <pre id="templatePlainText" style="height: 500px; width: 100%; overflow: auto; padding: 1rem; background: var(--body-bg); border-radius: var(--radius);"></pre>
                     </div>
                     <div class="tab-pane fade" id="source" role="tabpanel" aria-labelledby="source-tab">
-                        <pre id="templateSource" style="height: 500px; width: 100%; overflow: auto; padding: 1rem; background: #f8f9fc; border-radius: var(--border-radius);"></pre>
+                        <pre id="templateSource" style="height: 500px; width: 100%; overflow: auto; padding: 1rem; background: var(--body-bg); border-radius: var(--radius);"></pre>
                     </div>
                 </div>
             </div>
