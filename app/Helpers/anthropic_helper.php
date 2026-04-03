@@ -7,9 +7,10 @@ if (!function_exists('anthropic_generate_email')) {
      * @param string      $prompt      User's description of the email
      * @param string|null $base64Image Optional base64-encoded image for visual inspiration
      * @param string|null $mimeType    MIME type of the image (e.g. image/png)
+     * @param string|null $heroImageUrl  URL of a generated hero image to include
      * @return string|false            Raw text response from Claude, or false on error
      */
-    function anthropic_generate_email(string $prompt, ?string $base64Image = null, ?string $mimeType = null)
+    function anthropic_generate_email(string $prompt, ?string $base64Image = null, ?string $mimeType = null, ?string $heroImageUrl = null)
     {
         // Try multiple ways to get the API key (CI4 env() handles DotEnv correctly)
         $apiKey = env('ANTHROPIC_API_KEY') ?: ($_SERVER['ANTHROPIC_API_KEY'] ?? '');
@@ -107,6 +108,12 @@ SYSPROMPT;
         // Build the user message content
         $userContent = [];
 
+        // Add hero image instruction if generated
+        $heroInstruction = '';
+        if ($heroImageUrl) {
+            $heroInstruction = "\n\nIMPORTANT: A custom hero image has been generated for this email. Use this EXACT URL as the hero/header image in the email: {$heroImageUrl}\nDo NOT use placehold.co for the main hero image — use the URL above. You may still use placehold.co for other secondary images if needed.";
+        }
+
         // Add image if provided
         if ($base64Image && $mimeType) {
             $userContent[] = [
@@ -119,12 +126,12 @@ SYSPROMPT;
             ];
             $userContent[] = [
                 'type' => 'text',
-                'text' => "Use the attached image as visual inspiration for the design.\n\n" . $prompt,
+                'text' => "Use the attached image as visual inspiration for the design.\n\n" . $prompt . $heroInstruction,
             ];
         } else {
             $userContent[] = [
                 'type' => 'text',
-                'text' => $prompt,
+                'text' => $prompt . $heroInstruction,
             ];
         }
 

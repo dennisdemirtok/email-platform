@@ -155,6 +155,7 @@ class CampaignsController extends BaseController
         }
 
         helper('anthropic');
+        helper('gemini');
 
         $prompt = trim($this->request->getPost('prompt') ?? '');
         if (empty($prompt)) {
@@ -177,7 +178,16 @@ class CampaignsController extends BaseController
             }
         }
 
-        $result = anthropic_generate_email($prompt, $base64Image, $mimeType);
+        // Generate hero image with Gemini (if API key is configured)
+        $heroImageUrl = null;
+        if (function_exists('gemini_generate_image')) {
+            $heroImageUrl = gemini_generate_image($prompt, 'email-header');
+            if ($heroImageUrl) {
+                log_message('info', 'Gemini generated hero image: ' . $heroImageUrl);
+            }
+        }
+
+        $result = anthropic_generate_email($prompt, $base64Image, $mimeType, $heroImageUrl);
 
         if ($result === false) {
             return $this->response->setJSON([
