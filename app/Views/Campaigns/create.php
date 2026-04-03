@@ -215,28 +215,48 @@
                             <i class="fas fa-wand-magic-sparkles me-1"></i> Optimera med AI
                         </button>
                         <button type="button" id="sendPreviewBtn" class="btn btn-sm btn-accent" title="Skicka preview till din mail">
-                            <i class="fas fa-envelope me-1"></i> Preview
-                        </button>
-                        <button type="button" id="previewBtn" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-eye me-1"></i> Förhandsgranska
+                            <i class="fas fa-envelope me-1"></i> Skicka Preview
                         </button>
                     </div>
                 </div>
-                <div class="card-body p-0">
-                    <textarea id="htmlEditor" class="form-control border-0 rounded-0" rows="18" placeholder="Din email-HTML visas här. Använd AI-generatorn ovan, klistra in HTML, eller välj en template."
-                              style="min-height: 300px;"></textarea>
+
+                <!-- Preview (shown by default when content exists) -->
+                <div class="card-body p-0" id="previewContainer">
+                    <div id="previewEmpty" class="text-center py-5" style="color: var(--text-muted);">
+                        <i class="fas fa-envelope-open d-block mb-2" style="font-size: 2rem; opacity: 0.3;"></i>
+                        <p class="mb-0" style="font-size: 0.8125rem;">Generera eller klistra in ett mail för att se förhandsgranskning här.</p>
+                    </div>
+                    <iframe id="previewFrame" style="width: 100%; height: 600px; border: none; display: none;"></iframe>
+                </div>
+
+                <!-- Toggle to show HTML code -->
+                <div class="card-footer py-2 d-flex justify-content-between align-items-center" style="border-top: 1px solid var(--card-border, #e5e7eb);">
+                    <button type="button" id="toggleHtmlBtn" class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-code me-1"></i> Visa HTML-kod
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" id="optimizeAiBtn" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-wand-magic-sparkles me-1"></i> Optimera med AI
+                        </button>
+                    </div>
+                </div>
+
+                <!-- HTML Editor (hidden by default) -->
+                <div id="htmlEditorContainer" class="card-body p-0" style="display: none;">
+                    <textarea id="htmlEditor" class="form-control border-0 rounded-0" rows="18" placeholder="Din email-HTML visas här..."
+                              style="min-height: 300px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 0.8rem;"></textarea>
                 </div>
             </div>
 
             <!-- AI Optimize Panel (hidden by default) -->
-            <div id="optimizePanel" class="card mb-4" style="display: none; border-color: #4e73df;">
+            <div id="optimizePanel" class="card mb-4" style="display: none; border-color: var(--primary, #4F46E5);">
                 <div class="card-body">
                     <h6 class="mb-2"><i class="fas fa-wand-magic-sparkles me-2"></i>Optimera med AI</h6>
-                    <p class="text-muted mb-2" style="font-size: 0.85rem;">
-                        AI:n tar din befintliga HTML och förbättrar den. Beskriv vad du vill ändra.
+                    <p class="text-muted mb-2" style="font-size: 0.8125rem;">
+                        Beskriv vad du vill ändra — AI:n uppdaterar din design.
                     </p>
                     <textarea id="optimizePrompt" class="form-control mb-2" rows="2"
-                        placeholder="T.ex: Gör designen mer modern, byt till ett ljust färgschema, lägg till mer whitespace, gör den mobilanpassad..."></textarea>
+                        placeholder="T.ex: Byt header-bilden, ändra knappfärgen till grön, lägg till en sektion med 3 produkter..."></textarea>
                     <div class="d-flex gap-2">
                         <button type="button" id="optimizeGoBtn" class="btn btn-sm btn-primary">
                             <i class="fas fa-magic me-1"></i> Kör optimering
@@ -255,16 +275,7 @@
                 </div>
             </div>
 
-            <!-- Preview iframe (hidden by default) -->
-            <div id="previewContainer" class="card mb-4" style="display: none;">
-                <div class="card-header d-flex justify-content-between align-items-center py-2">
-                    <h6 class="mb-0"><i class="fas fa-eye me-2"></i>Förhandsgranskning</h6>
-                    <button type="button" id="closePreviewBtn" class="btn btn-sm btn-outline-secondary">
-                        <i class="fas fa-times me-1"></i> Stäng
-                    </button>
-                </div>
-                <div class="card-body p-0">
-                    <iframe id="previewFrame" style="width: 100%; height: 600px; border: none;"></iframe>
+            <!-- Legacy preview container removed — preview is now inline above -->
                 </div>
             </div>
 
@@ -390,11 +401,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Also insert into HTML if editor has content with placehold.co
                 var currentHtml = htmlEditor.value;
                 if (currentHtml.indexOf('placehold.co') !== -1) {
-                    // Replace first placehold.co image with uploaded image
                     htmlEditor.value = currentHtml.replace(/https:\/\/placehold\.co\/[^"'\s]+/, data.url);
+                    updatePreview();
                     if (typeof showToast === 'function') {
                         showToast('Placeholder-bild ersatt med din uppladdade bild!', 'success');
                     }
+                } else {
+                    updatePreview();
                 }
             } else {
                 alert(data.message || 'Kunde inte ladda upp bilden');
@@ -428,7 +441,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var html = this.dataset.html;
             if (html) {
                 htmlEditor.value = html;
-                htmlEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                updatePreview();
+                document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
                 if (typeof showToast === 'function') {
                     showToast('Template inladdad!', 'success');
                 }
@@ -436,20 +450,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // --- Preview ---
-    document.getElementById('previewBtn').addEventListener('click', function() {
+    // --- Auto-update preview when HTML changes ---
+    function updatePreview() {
         var html = htmlEditor.value.trim();
-        if (!html) {
-            alert('Ingen HTML att förhandsgranska. Skapa eller klistra in HTML först.');
-            return;
+        var previewFrame = document.getElementById('previewFrame');
+        var previewEmpty = document.getElementById('previewEmpty');
+        if (html) {
+            previewFrame.srcdoc = html;
+            previewFrame.style.display = 'block';
+            previewEmpty.style.display = 'none';
+        } else {
+            previewFrame.style.display = 'none';
+            previewEmpty.style.display = 'block';
         }
-        document.getElementById('previewFrame').srcdoc = html;
-        document.getElementById('previewContainer').style.display = 'block';
-        document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // Update preview on input (debounced)
+    var previewTimer = null;
+    htmlEditor.addEventListener('input', function() {
+        clearTimeout(previewTimer);
+        previewTimer = setTimeout(updatePreview, 500);
     });
 
-    document.getElementById('closePreviewBtn').addEventListener('click', function() {
-        document.getElementById('previewContainer').style.display = 'none';
+    // --- Toggle HTML editor visibility ---
+    document.getElementById('toggleHtmlBtn').addEventListener('click', function() {
+        var container = document.getElementById('htmlEditorContainer');
+        var isVisible = container.style.display !== 'none';
+        container.style.display = isVisible ? 'none' : 'block';
+        this.innerHTML = isVisible
+            ? '<i class="fas fa-code me-1"></i> Visa HTML-kod'
+            : '<i class="fas fa-eye me-1"></i> Dölj HTML-kod';
+        if (!isVisible) {
+            htmlEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     });
 
     // --- AI Generate ---
@@ -506,16 +539,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 htmlEditor.value = data.html;
+                updatePreview(); // Auto-show preview
 
                 var subjectField = document.getElementById('subject');
                 if (data.subject && !subjectField.value) {
                     subjectField.value = data.subject;
                 }
 
-                htmlEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 if (typeof showToast === 'function') {
-                    showToast('Email genererad! Du kan redigera HTML:en nedan eller optimera med AI.', 'success');
+                    showToast('Email genererad! Förhandsgranskning visas nedan.', 'success');
                 }
             } else {
                 errorDiv.style.display = 'block';
@@ -590,8 +624,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 htmlEditor.value = data.html;
+                updatePreview();
                 document.getElementById('optimizePanel').style.display = 'none';
-                htmlEditor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('previewContainer').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
                 if (typeof showToast === 'function') {
                     showToast('HTML optimerad! Kolla resultatet nedan.', 'success');
