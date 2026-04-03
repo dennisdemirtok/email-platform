@@ -50,6 +50,14 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('/domains/edit/(:segment)', 'DomainsController::edit/$1');
     $routes->post('/domains/delete/(:segment)', 'DomainsController::delete/$1');
     $routes->post('/domains/set-active/(:segment)', 'DomainsController::setActive/$1');
+
+    // CRM
+    $routes->get('/crm', 'CrmController::index');
+    $routes->get('/crm/profile/(:segment)', 'CrmController::profile/$1');
+    $routes->post('/crm/update', 'CrmController::updateCrm');
+    $routes->post('/crm/send-email/(:segment)', 'CrmController::sendEmail/$1');
+    $routes->get('/crm/import', 'CrmController::import');
+    $routes->post('/crm/import', 'CrmController::doImport');
 });
 
 $routes->group('users', ['filter' => ['auth', 'super']], function ($routes) {

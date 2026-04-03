@@ -64,6 +64,9 @@
             <a href="<?= base_url('/contacts') ?>" class="nav-link <?= ($currentPage ?? '') === 'contacts' ? 'active' : '' ?>">
                 <i class="fas fa-address-book"></i> Contacts
             </a>
+            <a href="<?= base_url('/crm') ?>" class="nav-link <?= ($currentPage ?? '') === 'crm' ? 'active' : '' ?>">
+                <i class="fas fa-briefcase"></i> CRM
+            </a>
             <div class="nav-section">Settings</div>
             <a href="<?= base_url('/domains') ?>" class="nav-link <?= ($currentPage ?? '') === 'domains' ? 'active' : '' ?>">
                 <i class="fas fa-globe"></i> Domains
