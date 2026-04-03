@@ -24,7 +24,7 @@ if (!function_exists('gemini_generate_image')) {
             default        => $prompt,
         };
 
-        $model = 'gemini-2.0-flash-exp';
+        $model = 'gemini-2.0-flash-preview-image-generation';
         $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$apiKey}";
 
         $payload = json_encode([

@@ -226,6 +226,74 @@ class CampaignsController extends BaseController
         ]);
     }
 
+    /**
+     * Send a preview/test email to a specified address.
+     */
+    public function sendPreview()
+    {
+        helper('resend');
+        helper('domain');
+
+        $email = trim($this->request->getPost('preview_email') ?? '');
+        $subject = trim($this->request->getPost('subject') ?? '');
+        $html = trim($this->request->getPost('html') ?? '');
+
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Ange en giltig e-postadress', 'csrf_token' => csrf_hash()]);
+        }
+        if (empty($html)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Ingen HTML att skicka', 'csrf_token' => csrf_hash()]);
+        }
+
+        $activeDomain = get_active_domain();
+        if (!$activeDomain) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Ingen aktiv domän', 'csrf_token' => csrf_hash()]);
+        }
+
+        $senderEmail = $activeDomain['sender_email'] ?? ('noreply@' . ($activeDomain['name'] ?? 'example.com'));
+        $prettyName = $activeDomain['pretty_name'] ?? $activeDomain['name'] ?? 'Email Platform';
+        $from = "{$prettyName} <{$senderEmail}>";
+        $previewSubject = '[PREVIEW] ' . ($subject ?: 'Test Email');
+        $plainText = strip_tags($html);
+
+        $result = resend_send_email($from, $email, $previewSubject, $html, $plainText);
+
+        if (!$result || empty($result['id'])) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Kunde inte skicka preview', 'csrf_token' => csrf_hash()]);
+        }
+
+        return $this->response->setJSON(['success' => true, 'message' => 'Preview skickad till ' . $email, 'csrf_token' => csrf_hash()]);
+    }
+
+    /**
+     * Upload an image for use in email templates.
+     */
+    public function uploadImage()
+    {
+        $file = $this->request->getFile('image');
+        if (!$file || !$file->isValid()) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Ingen giltig bild', 'csrf_token' => csrf_hash()]);
+        }
+
+        $allowedTypes = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+        if (!in_array($file->getMimeType(), $allowedTypes)) {
+            return $this->response->setJSON(['success' => false, 'message' => 'Ogiltigt bildformat', 'csrf_token' => csrf_hash()]);
+        }
+
+        $uploadDir = FCPATH . 'uploads/email-images/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $ext = $file->getExtension();
+        $filename = 'upload-' . uniqid() . '.' . $ext;
+        $file->move($uploadDir, $filename);
+
+        $url = rtrim(base_url(), '/') . '/uploads/email-images/' . $filename;
+
+        return $this->response->setJSON(['success' => true, 'url' => $url, 'csrf_token' => csrf_hash()]);
+    }
+
     public function update()
     {
         if (strtolower($this->request->getMethod()) !== 'post') {

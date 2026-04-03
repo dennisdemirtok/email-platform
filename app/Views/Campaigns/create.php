@@ -114,17 +114,39 @@
                 <!-- Tab: AI Generator -->
                 <div class="tab-pane fade show active" id="panel-ai" role="tabpanel">
                     <h6 class="mb-2"><i class="fas fa-magic me-2"></i>AI Email Generator</h6>
-                    <p class="text-muted mb-3" style="font-size: 0.85rem;">
-                        Beskriv mailet du vill skapa. AI:n genererar en proffsig, responsiv HTML-design.
-                        Du kan också bifoga en bild som referens.
+                    <p class="text-muted mb-2" style="font-size: 0.8125rem;">
+                        Välj en snabbmall eller skriv egen beskrivning. AI:n genererar proffsig HTML med unik hero-bild.
                     </p>
+
+                    <!-- Quick prompts -->
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett välkomstmail för nya kunder. Varm hälsning, introduktion till våra tjänster, och en CTA-knapp att utforska sortimentet.">
+                            <i class="fas fa-hand-wave me-1"></i> Välkomstmail
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett nyhetsbrev med senaste nyheter och uppdateringar. Inkludera en hero-bild, 2-3 artikelsektioner med rubriker och kort text, och en CTA-knapp.">
+                            <i class="fas fa-newspaper me-1"></i> Nyhetsbrev
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett kampanjmail med ett tidsbegränsat erbjudande. Inkludera en iögonfallande hero-bild, erbjudandedetaljer i en framhävd ruta, rabattkod, och en tydlig CTA-knapp.">
+                            <i class="fas fa-tag me-1"></i> Erbjudande/Kampanj
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett produktlanseringsmail. Hero-bild av produkten, produktbeskrivning, 3 key features med ikoner, pris, och en köp-knapp.">
+                            <i class="fas fa-rocket me-1"></i> Produktlansering
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett re-engagement mail till inaktiva kunder. Vi saknar dig-tema, erbjud incitament att komma tillbaka, visa vad de missat, och en stark CTA.">
+                            <i class="fas fa-heart me-1"></i> Win-back
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary quick-prompt" data-prompt="Skapa ett event-inbjudningsmail. Eventnamn, datum, tid, plats, kort beskrivning, och en anmälningsknapp.">
+                            <i class="fas fa-calendar me-1"></i> Event/Inbjudan
+                        </button>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-8 mb-2">
                             <textarea id="aiPrompt" class="form-control" rows="3"
-                                placeholder="T.ex: Skapa ett välkomstmail för nya kunder. Inkludera en hero-bild, en varm hälsning, och en rabattkod på 15%."></textarea>
+                                placeholder="Beskriv mailet du vill skapa... eller klicka på en snabbmall ovan och anpassa."></textarea>
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label class="form-label" style="font-size: 0.85rem;">Visuell inspiration (valfritt)</label>
+                            <label class="form-label" style="font-size: 0.8125rem;">Visuell inspiration (valfritt)</label>
                             <input type="file" id="aiImage" class="form-control form-control-sm" accept="image/png,image/jpeg,image/gif,image/webp">
                             <small class="form-text">Bifoga en skärmbild som referens</small>
                         </div>
@@ -135,7 +157,7 @@
                     <div id="aiLoading" class="mt-2" style="display:none;">
                         <div class="d-flex align-items-center gap-2" style="color: var(--primary);">
                             <div class="spinner-border spinner-border-sm" role="status"></div>
-                            <span style="font-size: 0.875rem;">Genererar ditt mail... detta kan ta 15-30 sekunder</span>
+                            <span style="font-size: 0.875rem;">Genererar mail + hero-bild... detta kan ta 20-40 sekunder</span>
                         </div>
                     </div>
                     <div id="aiError" class="alert alert-danger mt-2 mb-0 py-2" style="display:none; font-size: 0.85rem;"></div>
@@ -179,14 +201,21 @@
 
             <!-- HTML Editor + Preview -->
             <div class="card mb-4">
-                <div class="card-header d-flex justify-content-between align-items-center py-2">
+                <div class="card-header d-flex justify-content-between align-items-center py-2 flex-wrap gap-2">
                     <h6 class="mb-0"><i class="fas fa-file-code me-2"></i>Email HTML</h6>
-                    <div class="d-flex gap-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <button type="button" id="uploadImageBtn" class="btn btn-sm btn-outline-secondary" title="Ladda upp logo eller bild">
+                            <i class="fas fa-image me-1"></i> Bild
+                        </button>
+                        <input type="file" id="imageUploadInput" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none;">
                         <button type="button" id="saveTemplateBtn" class="btn btn-sm btn-outline-success">
                             <i class="fas fa-save me-1"></i> Spara som mall
                         </button>
                         <button type="button" id="optimizeAiBtn" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-wand-magic-sparkles me-1"></i> Optimera med AI
+                        </button>
+                        <button type="button" id="sendPreviewBtn" class="btn btn-sm btn-accent" title="Skicka preview till din mail">
+                            <i class="fas fa-envelope me-1"></i> Preview
                         </button>
                         <button type="button" id="previewBtn" class="btn btn-sm btn-outline-secondary">
                             <i class="fas fa-eye me-1"></i> Förhandsgranska
@@ -279,6 +308,105 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     var htmlEditor = document.getElementById('htmlEditor');
+
+    // --- Quick prompts ---
+    document.querySelectorAll('.quick-prompt').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var prompt = this.dataset.prompt;
+            document.getElementById('aiPrompt').value = prompt;
+            document.getElementById('aiPrompt').focus();
+            // Scroll to prompt area
+            document.getElementById('aiPrompt').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (typeof showToast === 'function') {
+                showToast('Mall inladdad! Anpassa texten och klicka Generera.', 'info');
+            }
+        });
+    });
+
+    // --- Send Preview Email ---
+    document.getElementById('sendPreviewBtn').addEventListener('click', function() {
+        var html = htmlEditor.value.trim();
+        if (!html) {
+            alert('Ingen HTML att skicka. Generera eller klistra in HTML först.');
+            return;
+        }
+        var email = prompt('Ange e-postadress att skicka preview till:');
+        if (!email) return;
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Skickar...';
+
+        var subject = document.getElementById('subject').value || 'Test Email';
+        var formData = new FormData();
+        formData.append('preview_email', email);
+        formData.append('subject', subject);
+        formData.append('html', html);
+        formData.append('csrf_test_name', document.querySelector('meta[name="csrf-token"]').content);
+
+        fetch(BASE_URL + 'campaigns/send-preview', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.csrf_token) document.querySelector('meta[name="csrf-token"]').content = data.csrf_token;
+            if (data.success) {
+                if (typeof showToast === 'function') showToast(data.message, 'success');
+            } else {
+                alert(data.message || 'Kunde inte skicka preview');
+            }
+        })
+        .catch(function(err) { alert('Fel: ' + err.message); })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-envelope me-1"></i> Preview';
+        });
+    });
+
+    // --- Upload Image ---
+    document.getElementById('uploadImageBtn').addEventListener('click', function() {
+        document.getElementById('imageUploadInput').click();
+    });
+
+    document.getElementById('imageUploadInput').addEventListener('change', function() {
+        if (!this.files.length) return;
+        var formData = new FormData();
+        formData.append('image', this.files[0]);
+        formData.append('csrf_test_name', document.querySelector('meta[name="csrf-token"]').content);
+
+        var btn = document.getElementById('uploadImageBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Laddar...';
+
+        fetch(BASE_URL + 'campaigns/upload-image', { method: 'POST', body: formData })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.csrf_token) document.querySelector('meta[name="csrf-token"]').content = data.csrf_token;
+            if (data.success && data.url) {
+                // Copy URL to clipboard and show toast
+                navigator.clipboard.writeText(data.url).then(function() {
+                    if (typeof showToast === 'function') {
+                        showToast('Bild uppladdad! URL kopierad. Klistra in i HTML eller be AI använda den.', 'success');
+                    }
+                });
+                // Also insert into HTML if editor has content with placehold.co
+                var currentHtml = htmlEditor.value;
+                if (currentHtml.indexOf('placehold.co') !== -1) {
+                    // Replace first placehold.co image with uploaded image
+                    htmlEditor.value = currentHtml.replace(/https:\/\/placehold\.co\/[^"'\s]+/, data.url);
+                    if (typeof showToast === 'function') {
+                        showToast('Placeholder-bild ersatt med din uppladdade bild!', 'success');
+                    }
+                }
+            } else {
+                alert(data.message || 'Kunde inte ladda upp bilden');
+            }
+        })
+        .catch(function(err) { alert('Fel: ' + err.message); })
+        .finally(function() {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-image me-1"></i> Bild';
+            document.getElementById('imageUploadInput').value = '';
+        });
+    });
 
     // --- Paste HTML into editor ---
     document.getElementById('pasteHtmlBtn').addEventListener('click', function() {

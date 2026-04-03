@@ -23,6 +23,8 @@ $routes->group('', ['filter' => 'auth'], function ($routes) {
     $routes->post('/campaigns/sync-status/(:segment)', 'CampaignsController::syncCampaignStatus/$1');
     $routes->post('/campaigns/save-template', 'CampaignsController::saveTemplate');
     $routes->post('/campaigns/delete-template/(:segment)', 'CampaignsController::deleteTemplate/$1');
+    $routes->post('/campaigns/send-preview', 'CampaignsController::sendPreview');
+    $routes->post('/campaigns/upload-image', 'CampaignsController::uploadImage');
 
     $routes->get('/logs', 'LogsController::index');
     $routes->get('/explorer', 'LogsController::explorer');
