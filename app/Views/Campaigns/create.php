@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(BASE_URL + 'campaigns/send-preview', { method: 'POST', body: formData })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (data.csrf_token) document.querySelector('meta[name="csrf-token"]').content = data.csrf_token;
+            if (data.csrf_token) syncCsrfTokens(data.csrf_token);
             if (data.success) {
                 if (typeof showToast === 'function') showToast(data.message, 'success');
             } else {
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(BASE_URL + 'campaigns/upload-image', { method: 'POST', body: formData })
         .then(function(r) { return r.json(); })
         .then(function(data) {
-            if (data.csrf_token) document.querySelector('meta[name="csrf-token"]').content = data.csrf_token;
+            if (data.csrf_token) syncCsrfTokens(data.csrf_token);
             if (data.success && data.url) {
                 // Copy URL to clipboard and show toast
                 navigator.clipboard.writeText(data.url).then(function() {
@@ -532,10 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(function(data) {
-            if (data.csrf_token) {
-                var csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
-                csrfInputs.forEach(function(input) { input.value = data.csrf_token; });
-            }
+            if (data.csrf_token) syncCsrfTokens(data.csrf_token);
 
             if (data.success) {
                 htmlEditor.value = data.html;
@@ -617,10 +614,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return response.json();
         })
         .then(function(data) {
-            if (data.csrf_token) {
-                var csrfInputs = document.querySelectorAll('input[name="csrf_test_name"]');
-                csrfInputs.forEach(function(input) { input.value = data.csrf_token; });
-            }
+            if (data.csrf_token) syncCsrfTokens(data.csrf_token);
 
             if (data.success) {
                 htmlEditor.value = data.html;
@@ -717,8 +711,28 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // --- Keep CSRF token in sync across all forms ---
+    function syncCsrfTokens(newToken) {
+        if (!newToken) return;
+        // Update meta tag
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        if (meta) meta.setAttribute('content', newToken);
+        // Update ALL hidden csrf fields in ALL forms
+        document.querySelectorAll('input[name="csrf_test_name"]').forEach(function(input) {
+            input.value = newToken;
+        });
+    }
+
     // --- Form submit ---
     document.getElementById('campaignForm').addEventListener('submit', function(e) {
+        // Sync CSRF token from meta to form before submit
+        var metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            document.querySelectorAll('input[name="csrf_test_name"]').forEach(function(input) {
+                input.value = metaToken.getAttribute('content');
+            });
+        }
+
         var html = htmlEditor.value.trim();
 
         if (!html) {
