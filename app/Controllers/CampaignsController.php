@@ -202,20 +202,38 @@ class CampaignsController extends BaseController
         // Strip markdown code fences if present
         $cleaned = preg_replace('/^```(?:json)?\s*/i', '', $cleaned);
         $cleaned = preg_replace('/\s*```$/', '', $cleaned);
-        // Remove control characters that break json_decode (except normal whitespace)
+        // Remove control characters that break json_decode (except normal whitespace \n\r\t)
         $cleaned = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $cleaned);
 
+        // Ensure valid UTF-8
+        $cleaned = mb_convert_encoding($cleaned, 'UTF-8', 'UTF-8');
+
         $parsed = json_decode($cleaned, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+
+        // Fallback: try to extract subject and html manually if JSON fails
         if (!$parsed || !isset($parsed['html'])) {
-            // Try to extract HTML directly if JSON parsing failed
-            error_log('AI response parse failed. Raw (first 500 chars): ' . substr($result, 0, 500));
-            error_log('Cleaned (first 500 chars): ' . substr($cleaned, 0, 500));
-            error_log('JSON error: ' . json_last_error_msg());
-            return $this->response->setJSON([
-                'success'    => false,
-                'error'      => 'Could not parse AI response. Please try again.',
-                'csrf_token' => csrf_hash(),
-            ]);
+            // Try regex extraction as fallback
+            $html = null;
+            $subject = '';
+
+            if (preg_match('/"html"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $cleaned, $htmlMatch)) {
+                $html = stripcslashes($htmlMatch[1]);
+            }
+            if (preg_match('/"subject"\s*:\s*"((?:[^"\\\\]|\\\\.)*)"/s', $cleaned, $subjectMatch)) {
+                $subject = stripcslashes($subjectMatch[1]);
+            }
+
+            if ($html) {
+                $parsed = ['html' => $html, 'subject' => $subject];
+            } else {
+                error_log('AI response parse failed. JSON error: ' . json_last_error_msg());
+                error_log('Raw (first 300 chars): ' . substr($result, 0, 300));
+                return $this->response->setJSON([
+                    'success'    => false,
+                    'error'      => 'Could not parse AI response. Please try again.',
+                    'csrf_token' => csrf_hash(),
+                ]);
+            }
         }
 
         return $this->response->setJSON([
